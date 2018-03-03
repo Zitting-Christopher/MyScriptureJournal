@@ -1,0 +1,40 @@
+﻿@{
+    Layout = "~/_Layout.cshtml";
+    var db = Database.Open("ScriptureJournal");
+    var selectRow = "SELECT * FROM scriptureJournal WHERE id=@0";
+
+    if (!Request["id"].IsEmpty())
+    {
+    }
+}
+<br />
+<div class="container">
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
+            <h2>Edit Scripture</h2>
+            <form action="~/Index" method="post">
+                @foreach (var row in db.Query(selectRow, Request["id"]))
+    {
+            <div class="form-group">
+                <label class="control-label" for="update_book">Book</label>
+                <input type="text" class="form-control" id="update_book" name="update_book" value="@row["book"]" placeholder="Enter Book" required>
+                <br />
+                <label class="control-label" for="update_chapter">Chapter</label>
+                <input type="text" class="form-control" id="update_chapter" name="update_chapter" value="@row["chapter"]" placeholder="Enter Chapter" required>
+                <br />
+                <label class="control-label" for="update_verse">Verse</label>
+                <input type="text" class="form-control" id="update_verse" name="update_verse" value="@row["verse"]" placeholder="Enter Verse" required>
+                <br />
+                <label class="control-label" for="update_note">Note</label>
+                <textarea class="form-control" id="update_note" name="update_note" required>@row["note"]</textarea>
+            </div>
+            <input type="hidden" name="update_date" value="@DateTime.Now" />
+            <input type="hidden" name="id" value="@row["id"]" />
+}
+                <button type="submit" class="btn btn-default">Update</button>
+            </form>
+        </div>
+        <div class="col-sm-2"></div>
+    </div>
+</div>

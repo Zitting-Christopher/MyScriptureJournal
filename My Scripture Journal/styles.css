@@ -1,0 +1,30 @@
+﻿.grid {
+    margin: 4px auto;
+    border-collapse: collapse;
+    /*width: 600px;*/
+    text-align: center;
+    font-family: 'Arimo', sans-serif;
+}
+
+    .grid th {
+        border: 1px solid #C0C0C0;
+        padding: 5px;
+        color: #000;
+    }
+
+    .grid td {
+        border: 1px solid #C0C0C0;
+        padding: 5px;
+        max-width:450px;
+    }
+
+.head {
+    background-color: #E8E8E8;
+    font-weight: bold;
+    color: #FFF;
+}
+
+.alt {
+    background-color: #E8E8E8;
+    color: #000;
+}

@@ -1,0 +1,99 @@
+﻿@{
+    /**/
+
+    Layout = "~/_Layout.cshtml";
+    var db = Database.Open("ScriptureJournal");
+    var altTxt = "";
+
+    if (IsPost)
+    {
+        altTxt = Request["book"] + " | " + Request["chapter"] + " | " + Request["verse"] + " | " + Request["note"] + " | " + Request["date"] + " | ";
+    }
+
+    //Add scripture to DB
+    if (IsPost && !Request["book"].IsEmpty() && !Request["chapter"].IsEmpty() && !Request["verse"].IsEmpty() && !Request["note"].IsEmpty())
+    {
+        var insertRecord = "INSERT INTO scriptureJournal (book, chapter, verse, note, date_added) VALUES(@0, @1, @2, @3, @4)";
+        db.Execute(insertRecord, Request["book"], Request["chapter"], Request["verse"], Request["note"], Request["date"]);
+
+        altTxt = "<div class='alert alert-success alert-dismissible' role='alert'><button type = 'button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>Your record was added to the table.</div>'";
+
+        Response.Redirect("~/Index");
+    }
+
+    //Update scripture in DB
+    if (IsPost && !Request["update_book"].IsEmpty() && !Request["update_chapter"].IsEmpty() && !Request["update_verse"].IsEmpty() && !Request["update_note"].IsEmpty() && !Request["id"].IsEmpty())
+    {
+        var updateRecord = "UPDATE scriptureJournal SET book=@0, chapter=@1, verse=@2, note=@3, date_added=@4 WHERE id=@5";
+        db.Execute(updateRecord, Request["update_book"], Request["update_chapter"], Request["update_verse"], Request["update_note"], Request["update_date"], Request["id"]);
+
+        Response.Redirect("~/Index");
+    }
+
+    //Delete scripture from db
+    if (!Request["id"].IsEmpty())
+    {
+        var deleteRecord = "DELETE FROM scriptureJournal WHERE id=@0";
+        db.Execute(deleteRecord,Request["id"]);
+
+        Response.Redirect("~/Index");
+    }
+
+    //Get all the scriptures
+    var selectCmd = "SELECT * FROM scriptureJournal";
+    var searchTerm = "";
+
+
+    //Search by Keyword
+    if (!Request.QueryString["keyword"].IsEmpty())
+    {
+        selectCmd = "SELECT * FROM scriptureJournal WHERE note LIKE @0";
+        searchTerm = "%" + Request["keyword"] + "%";
+    }
+    //Search by book
+    if (!Request.QueryString["book"].IsEmpty())
+    {
+        selectCmd = "SELECT * FROM scriptureJournal WHERE book = @0";
+        searchTerm = Request.QueryString["book"];
+    }
+
+    var selectedData = db.Query(selectCmd, searchTerm);
+    var grid = new WebGrid(source: selectedData, rowsPerPage: 5, defaultSort: "Book");
+    }
+    @altTxt;
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
+
+            <div style="text-align:center;">
+                <form class="form-inline" style="display:inline-block;" action="Index" method="get">
+                    <input type="text" class="form-control mr-sm-2" name="keyword" value="@Request.QueryString["keyword"]" placeholder="Search by keyword">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                </form>
+                <form class="form-inline" style="display:inline-block;" action="Index" method="get">
+                    <input type="text" class="form-control mr-sm-2" name="book" value="@Request.QueryString["book"]" placeholder="Search by Book">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
+            <h2>Scripture Journal</h2>
+            @grid.GetHtml(tableStyle: "grid",
+                                   headerStyle: "head",
+                                   alternatingRowStyle: "alt",
+                                   columns: grid.Columns(
+                                       grid.Column(format: @<a href="Edit?id=@item.id"><span class="glyphicon glyphicon-pencil"></span></a>, header: "Edit", canSort: false),
+                           grid.Column("book", header: "Book"),
+                           grid.Column("chapter", header: "Chapter", canSort: false),
+                           grid.Column("verse", header: "Verse", canSort: false),
+                           grid.Column(columnName: "note", header: "Note", canSort: false),
+                           grid.Column("date_added", header: "Date added"),
+                           grid.Column(format:
+                        @<a href="?id=@item.id"><span class="glyphicon glyphicon-trash"></span></a>, header: "Delete", canSort: false)
+                 )
+                 )
+        </div>
+                                    <div class="col-sm-2"></div>
+                                </div>
+                            </div>
